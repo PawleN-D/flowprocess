@@ -1,12 +1,14 @@
-import React, { useState } from "react";
-// import { Stack, IStackTokens } from "@fluentui/react";
-// import { PrimaryButton } from "@fluentui/react/lib/Button";
-// import { Label } from "@fluentui/react/lib/Label";
-// import { TextField } from "@fluentui/react/lib/TextField";
-// import { IconButton } from "@fluentui/react/lib/Button";
-// import { initializeIcons } from "@fluentui/font-icons-mdl2";
+import React, { useEffect } from "react";
+import { FlowStore } from "./flowStore.js";
+import { SDK } from "./sdkInit";
+import { Stack, IStackTokens } from "@fluentui/react";
+import { PrimaryButton } from "@fluentui/react/lib/Button";
+import { Label } from "@fluentui/react/lib/Label";
+import { TextField } from "@fluentui/react/lib/TextField";
+import { IconButton } from "@fluentui/react/lib/Button";
+import { initializeIcons } from "@fluentui/font-icons-mdl2";
 
-// initializeIcons();
+initializeIcons();
 
 function _submitForm(e, token, id, callback, setObject) {
   e.preventDefault();
@@ -37,12 +39,43 @@ function _submitForm(e, token, id, callback, setObject) {
 }
 
 function FlowContent(props) {
-  const [theArrayOfObjects, setTheArrayOfObjects] = useState("");
+  const credentials = {
+    appKey: "D167BC13-0848-4A8A-9823-9D8B9DACE899",
+    secret: "xs4crm@iris",
+  };
+  SDK.client.auth.appLogin(credentials).then((res) => {
+    console.log(res);
+  });
+
+  const flowStore = new FlowStore();
+  const instanceID = "BP_Reparatieverzoek";
+
+  useEffect(() => {
+    if (instanceID)
+      flowStore.onFlowInit(true, { instanceID: instanceID, values: {} });
+  }, [instanceID]);
+
+  const backFlow = (id, screen) => {
+    flowStore.onFlowBackAction(id);
+  };
+  const initValues = (elements) => {
+    var obj = Object.fromEntries(
+      elements !== null && elements !== undefined
+        ? elements.map((e) => {
+            return [e.data.outputKey, ""];
+          })
+        : []
+    );
+    delete obj["undefined"];
+    delete obj["/"];
+    return obj ? obj : {};
+  };
+  // const [theArrayOfObjects, setTheArrayOfObjects] = useState("");
   const handleChangeArrayAddObject1 = (event) => {
     event.preventDefault();
     const value = event.target[0].value;
 
-    console.log(value);
+    // console.log(value);
 
     // console.log("handleChangeAddAddObject: ", value);
     props.addAnswer(value);
@@ -59,24 +92,24 @@ function FlowContent(props) {
   };
   //console.log(props);
   //const { IIconProps, IContextualMenuProps, Stack, Link, IconButton, ThemeProvider, initializeIcons } = window.FluentUIReact;
-  const stackTokens: IStackTokens = { childrenGap: 5 };
-  const stackStyles: Partial<IStackStyles> = { root: {} };
+  const stackTokens = { childrenGap: 5 };
+  const stackStyles = { root: {} };
   // const stackButtonStyles: Partial<IStackStyles> = { root: { width: 230 } };
-  const nextIcon: IIconProps = { iconName: "DoubleChevronRight8" };
-  const firstStackStyles: IStackStyles = {
+  const nextIcon = { iconName: "DoubleChevronRight8" };
+  const firstStackStyles = {
     root: {},
   };
-  const containerStackStyles: IStackStyles = {
+  const containerStackStyles = {
     root: {},
   };
-  const textStyles: React.CSSProperties = {
+  const textStyles = {
     width: 240,
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
   };
 
-  const stackItemStyles: React.CSSProperties = {
+  const stackItemStyles = {
     ...textStyles,
   };
 
