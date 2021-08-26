@@ -1,140 +1,61 @@
 import React, { useState, useEffect } from "react";
+import { FlowProvider, FlowStore } from "./flowStore.js";
+import { SDK } from "./sdkInit";
+
 import FlowContent from "./flowcontent";
 import "./App.css";
 
-// const client = new IRIS("https://www.woonplezier.nu");
-
-// const login = await client.auth.appLogin({
-//   appKey: "abcdefgh-1234-abcd-vxyz-ijklmnop5678",
-//   secret: "s3cr3t123!",
-// });
-
-// const data = await client.flow.init("BP_Reparatieverzoek");
-
 function App() {
-  const [data, setData] = useState({});
-  const [token, setToken] = useState("-");
-  const [loading, setLoading] = useState(true);
+  const credentials = {
+    appKey: "D167BC13-0848-4A8A-9823-9D8B9DACE899",
+    secret: "xs4crm@iris",
+  };
+  SDK.client.auth.appLogin(credentials).then((res) => {
+    console.log("Done");
+  });
 
-  const addAnswer = (value) => {
-    console.log(value);
+  const flowStore = new FlowStore();
+  console.log();
+  const instanceID = "BP_Reparatieverzoek";
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (instanceID) {
+        await flowStore.onFlowInit(true, {
+          instanceID: instanceID,
+          values: [{}],
+        });
+      }
+    };
+    fetchData();
+  }, [instanceID]);
+  const backFlow = (id, screen) => {
+    flowStore.onFlowBackAction(id);
+  };
+  const initValues = (elements) => {
+    var obj = Object.fromEntries(
+      elements !== null && elements !== undefined
+        ? elements.map((e) => {
+            return [e.data.outputKey, ""];
+          })
+        : []
+    );
+    delete obj["undefined"];
+    delete obj["/"];
+    return obj ? obj : {};
   };
 
-  // const Login = () => {
-  //   const loginData = {
-  //     appKey: "D167BC13-0848-4A8A-9823-9D8B9DACE899",
-  //     secret: "xs4crm@iris",
-  //   };
-  //   // console.log("login running");
-  //   fetch("https://TeamBP-VeraDev.azurewebsites.net/api/iris/auth/applogin", {
-  //     method: "POST",
-  //     headers: {
-  //       "Content-type": "application/json",
-  //       "Access-Control-Allow-Origin": "*",
-  //     },
-  //     body: JSON.stringify(loginData),
-  //   })
-  //     .then((r) => r.json())
-  //     .then((res) => {
-  //       setLoading(false);
-  //       setToken(res.token);
-  //       setData(res);
-  //       // this.setState({
-  //       //   loading: false,
-  //       //   token: res.token,
-  //       //   data: res,
-  //       // });
-  //       /* Initiate the flow */
-  //       initFlow({ token: res.token });
-  //     })
-  //     .catch((error) => {
-  //       console.error("Error:", error);
-  //     });
-  // };
-
-  // const continueFlow = (data, token, id) => {
-  //   if (data !== "") {
-  //     data = JSON.parse(data);
-  //     console.log(data);
-  //   }
-
-  //   fetch(
-  //     "https://TeamBP-VeraDev.azurewebsites.net/api/iris/flow/instance/" +
-  //       id +
-  //       "/continue?debug=true",
-  //     {
-  //       method: "POST",
-  //       headers: {
-  //         Authorization: "Bearer " + token,
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify(data),
-  //     }
-  //   )
-  //     .then((r) => r.json())
-  //     .then((res, prevState) => {
-  //       console.log(prevState);
-  //       console.log(res);
-  //       setLoading(false);
-  //       setToken(token);
-  //       setData(res);
-  //       // this.setState({
-  //       //   loading: false,
-  //       //   token: token,
-  //       //   data: res,
-
-  //       //   question: res.elements[0].data.text,
-
-  //       //   //   renderResp: "",
-  //       // });
-
-  //       // console.log(this.state.renderResp);
-  //     })
-  //     .catch((error) => {
-  //       console.error("Error:", error);
-  //     });
-  // };
-
-  // useEffect(() => {
-  //   Login();
-  // }, []);
-
-  // const initFlow = (props) => {
-  //   console.log(props);
-  //   fetch(
-  //     "https://TeamBP-VeraDev.azurewebsites.net/api/iris/flow/instance/BP_Reparatieverzoek/init",
-  //     {
-  //       method: "POST",
-  //       headers: { Authorization: "Bearer " + props.token },
-  //       body: JSON.stringify(),
-  //     }
-  //   )
-  //     .then((r) => r.json())
-  //     .then((res) => {
-  //       setLoading(false);
-  //       setToken(props.token);
-  //       setData(res);
-  //       // this.setState({
-  //       //   loading: false,
-  //       //   token: props.token,
-  //       //   data: res,
-  //     });
-
-  //   // .catch((error) => {
-  //   //   console.error("Error:", error);
-  //   // });
-  // };
   return (
-    <div className="App">
-      <FlowContent
-        // initFlow={initFlow}
-        token={token}
-        flow={"BP_Reparatieverzoek"}
+    <FlowProvider store={flowStore}>
+      <div className="App">
+        <FlowContent
+        //initFlow={initFlow}
+        // token={token}
+        // flow={"BP_Reparatieverzoek"}
         // continueFlow={continueFlow}
-        data={data}
-        addAnswer={addAnswer}
-      />
-    </div>
+        />
+      </div>
+    </FlowProvider>
   );
 }
 

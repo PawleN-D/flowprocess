@@ -1,5 +1,7 @@
 import React, { createContext, useContext } from "react";
+import FlowContent from "./flowcontent";
 import { SDK } from "./sdkInit";
+
 class FlowStore {
   constructor() {
     this.isLoading = false;
@@ -19,13 +21,14 @@ class FlowStore {
           state === "continue"
             ? await SDK.client.flow[state](flowID, value)
             : await SDK.client.flow[state](value);
-        console.log(flowdata);
+        console.log(flowdata.data);
         return flowdata.data;
       } catch (error) {
         this.onError(error);
       }
     };
     this.onFlowInit = async (init, data) => {
+      this.getData(init, data);
       try {
         this.setHasError(false);
         this.setIsLoading(true);
@@ -34,7 +37,26 @@ class FlowStore {
           ? await this.executeFlow(data.instanceID, "init")
           : await this.executeFlow(data.values, "continue", data.id);
         this.setIsLoading(false);
+        console.log(response);
         this.setFlow(response);
+        return response;
+      } catch (error) {
+        this.onError(error);
+      }
+    };
+
+    this.getData = async (init, data) => {
+      try {
+        // this.setHasError(false);
+        // this.setIsLoading(true);
+        // Ternary check if state = init => init state : continue state
+        const response = init
+          ? await this.executeFlow(data.instanceID, "init")
+          : await this.executeFlow(data.values, "continue", data.id);
+        // this.setIsLoading(false);
+        console.log(response);
+        return response;
+        // this.setFlow(response);
       } catch (error) {
         this.onError(error);
       }
